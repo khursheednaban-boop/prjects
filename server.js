@@ -1,32 +1,35 @@
 // server.js — simple auth backend for school project
-// Stack: Express + SQLite (better-sqlite3) + bcrypt password hashing + sessions
-
+// Stack: Express + PostgreSQL (pg) + bcrypt password hashing + sessions
 const express = require('express');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
-const Database = require('better-sqlite3');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ---------- Database setup ----------
-// Creates a file called users.db in this folder. Real, persistent SQL database.
-const db = new Database(path.join(__dirname, 'users.db'));
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // Railway requires SSL
+});
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+async function initDb() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+}
+initDb().catch(err => console.error('DB init error:', err));
 
 // ---------- Middleware ----------
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.use(session({
   secret: process.env.SESSION_SECRET || 'change-this-secret-in-production',
   resave: false,
@@ -39,7 +42,6 @@ app.use(session({
 // Create an account
 app.post('/api/signup', async (req, res) => {
   const { username, password } = req.body;
-
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required.' });
   }
@@ -47,39 +49,50 @@ app.post('/api/signup', async (req, res) => {
     return res.status(400).json({ error: 'Password must be at least 6 characters.' });
   }
 
-  const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(username);
-  if (existing) {
-    return res.status(409).json({ error: 'That username is already taken.' });
+  try {
+    const existing = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'That username is already taken.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    await pool.query(
+      'INSERT INTO users (username, password_hash) VALUES ($1, $2)',
+      [username, passwordHash]
+    );
+    res.json({ message: 'Account created. You can now log in.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Signup failed.' });
   }
-
-  const passwordHash = await bcrypt.hash(password, 10);
-  db.prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)').run(username, passwordHash);
-
-  res.json({ message: 'Account created. You can now log in.' });
 });
 
 // Log in
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
-
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password are required.' });
   }
 
-  const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
-  if (!user) {
-    return res.status(401).json({ error: 'Incorrect username or password.' });
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(401).json({ error: 'Incorrect username or password.' });
+    }
+
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) {
+      return res.status(401).json({ error: 'Incorrect username or password.' });
+    }
+
+    req.session.userId = user.id;
+    req.session.username = user.username;
+    res.json({ message: `Welcome back, ${user.username}!` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Login failed.' });
   }
-
-  const match = await bcrypt.compare(password, user.password_hash);
-  if (!match) {
-    return res.status(401).json({ error: 'Incorrect username or password.' });
-  }
-
-  req.session.userId = user.id;
-  req.session.username = user.username;
-
-  res.json({ message: `Welcome back, ${user.username}!` });
 });
 
 // Check current session (used by the dashboard page)
