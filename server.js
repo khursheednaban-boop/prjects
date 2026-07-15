@@ -1,8 +1,7 @@
 // server.js — simple auth backend for school project
-// Stack: Express + PostgreSQL (pg) + bcrypt password hashing + sessions
+// Stack: Express + PostgreSQL (pg) + sessions (PLAIN TEXT PASSWORDS — DEMO ONLY)
 const express = require('express');
 const path = require('path');
-const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const { Pool } = require('pg');
 
@@ -12,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 // ---------- Database setup ----------
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false } // Railway requires SSL
+  ssl: { rejectUnauthorized: false }
 });
 
 async function initDb() {
@@ -20,7 +19,7 @@ async function initDb() {
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       username TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
+      password TEXT NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -34,12 +33,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'change-this-secret-in-production',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 } // 1 hour
+  cookie: { maxAge: 1000 * 60 * 60 }
 }));
 
 // ---------- Routes ----------
 
-// Create an account
 app.post('/api/signup', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -55,10 +53,9 @@ app.post('/api/signup', async (req, res) => {
       return res.status(409).json({ error: 'That username is already taken.' });
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
     await pool.query(
-      'INSERT INTO users (username, password_hash) VALUES ($1, $2)',
-      [username, passwordHash]
+      'INSERT INTO users (username, password) VALUES ($1, $2)',
+      [username, password]
     );
     res.json({ message: 'Account created. You can now log in.' });
   } catch (err) {
@@ -67,7 +64,6 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-// Log in
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -77,12 +73,7 @@ app.post('/api/login', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     const user = result.rows[0];
-    if (!user) {
-      return res.status(401).json({ error: 'Incorrect username or password.' });
-    }
-
-    const match = await bcrypt.compare(password, user.password_hash);
-    if (!match) {
+    if (!user || user.password !== password) {
       return res.status(401).json({ error: 'Incorrect username or password.' });
     }
 
@@ -95,7 +86,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Check current session (used by the dashboard page)
 app.get('/api/me', (req, res) => {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Not logged in.' });
@@ -103,7 +93,6 @@ app.get('/api/me', (req, res) => {
   res.json({ username: req.session.username });
 });
 
-// Log out
 app.post('/api/logout', (req, res) => {
   req.session.destroy(() => {
     res.json({ message: 'Logged out.' });
