@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snapchat - Sign Up</title>
+<style>
+  :root{
+    --sc-yellow:#FFFC00;
+    --sc-black:#0a0a0a;
+    --sc-gray-text:#6c6c6c;
+    --sc-border:#d9d9d9;
+    --sc-blue-link:#0eadff;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{
+    font-family:'Avenir Next','Helvetica Neue',Arial,sans-serif;
+    background:#fff; color:var(--sc-black);
+    min-height:100vh; display:flex; flex-direction:column;
+  }
+  .top-bar{ height:6px; background:var(--sc-yellow); width:100%; }
+  .page-wrap{
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:flex-start; padding:40px 20px;
+  }
+  .logo-mark{ width:80px; height:80px; margin-bottom:8px; }
+  .brand-word{
+    font-weight:800; font-size:13px; letter-spacing:2px;
+    text-transform:uppercase; margin-bottom:36px; color:var(--sc-black);
+  }
+  .card{ width:100%; max-width:400px; display:flex; flex-direction:column; align-items:center; }
+  .card h1{ font-size:22px; font-weight:700; margin-bottom:24px; text-align:center; }
+  form{ width:100%; display:flex; flex-direction:column; gap:12px; }
+  .field input{
+    width:100%; padding:14px; font-size:15px; border:1px solid var(--sc-border);
+    border-radius:4px; background:#fafafa; outline:none; transition:border-color .15s ease;
+  }
+  .field input:focus{ border-color:var(--sc-black); background:#fff; }
+  .signup-btn{
+    margin-top:6px; width:100%; padding:14px; background:var(--sc-yellow); color:var(--sc-black);
+    font-weight:800; font-size:15px; border:none; border-radius:24px; cursor:pointer;
+  }
+  .signup-btn:hover{ box-shadow:0 2px 10px rgba(0,0,0,.15); }
+  .back-link{ margin-top:16px; font-size:13px; color:var(--sc-blue-link); text-decoration:none; }
+  .back-link:hover{ text-decoration:underline; }
+  footer{ margin-top:auto; padding:24px 16px; text-align:center; font-size:11px; color:var(--sc-gray-text); }
+</style>
+</head>
+<body>
+  <div class="top-bar"></div>
+  <div class="page-wrap">
+    <svg class="logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="App logo">
+      <path d="M50 8 C 68 8, 76 22, 75 38 C 75 42, 75 46, 76 49 C 82 49, 87 52, 88 56 C 89 59, 87 61, 84 62 C 87 64, 89 67, 88 70 C 87 73, 83 74, 80 74 C 78 80, 72 84, 66 82 C 62 86, 56 88, 50 88 C 44 88, 38 86, 34 82 C 28 84, 22 80, 20 74 C 17 74, 13 73, 12 70 C 11 67, 13 64, 16 62 C 13 61, 11 59, 12 56 C 13 52, 18 49, 24 49 C 25 46, 25 42, 25 38 C 24 22, 32 8, 50 8 Z"
+            fill="var(--sc-yellow)" stroke="var(--sc-black)" stroke-width="2.5" stroke-linejoin="round"/>
+    </svg>
+    <div class="brand-word">Snapchat</div>
+
+    <div class="card">
+      <h1>Create your account</h1>
+      <form id="signupForm">
+        <div class="field">
+          <input type="text" id="username" placeholder="Choose a username" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <input type="password" id="password" placeholder="Choose a password (min 6 chars)" autocomplete="new-password" required>
+        </div>
+        <button type="submit" class="signup-btn">Sign Up</button>
+      </form>
+      <p id="statusMsg" style="min-height:18px;font-size:13px;margin-top:12px;text-align:center;"></p>
+      <a href="login.html" class="back-link">Already have an account? Log in</a>
+    </div>
+  </div>
+
+  <footer>&copy; 2026 Snapchat Demo &middot; School project — test accounts only.</footer>
+
+  <script>
+    const form = document.getElementById('signupForm');
+    const statusMsg = document.getElementById('statusMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusMsg.style.color = '#6c6c6c';
+      statusMsg.textContent = 'Creating account...';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          statusMsg.style.color = '#e0245e';
+          statusMsg.textContent = data.error || 'Signup failed.';
+          return;
+        }
+
+        statusMsg.style.color = '#2f9e44';
+        statusMsg.textContent = data.message;
+        setTimeout(() => window.location.href = 'login.html', 800);
+      } catch (err) {
+        statusMsg.style.color = '#e0245e';
+        statusMsg.textContent = 'Could not reach the server.';
+      }
+    });
+  </script>
+</body>
+</html>

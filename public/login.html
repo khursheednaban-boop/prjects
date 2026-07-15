@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snapchat - Log In</title>
+<style>
+  :root{
+    --sc-yellow:#FFFC00;
+    --sc-black:#0a0a0a;
+    --sc-gray-text:#6c6c6c;
+    --sc-border:#d9d9d9;
+    --sc-blue-link:#0eadff;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  body{
+    font-family:'Avenir Next','Helvetica Neue',Arial,sans-serif;
+    background:#fff;
+    color:var(--sc-black);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* Top yellow strip */
+  .top-bar{
+    height:6px;
+    background:var(--sc-yellow);
+    width:100%;
+  }
+
+  .page-wrap{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding:40px 20px;
+  }
+
+  .logo-mark{
+    width:80px;
+    height:80px;
+    margin-bottom:8px;
+  }
+
+  .brand-word{
+    font-weight:800;
+    font-size:13px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-bottom:36px;
+    color:var(--sc-black);
+  }
+
+  .login-card{
+    width:100%;
+    max-width:400px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .login-card h1{
+    font-size:22px;
+    font-weight:700;
+    margin-bottom:24px;
+    text-align:center;
+  }
+
+  form{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .field{
+    position:relative;
+    width:100%;
+  }
+
+  .field input{
+    width:100%;
+    padding:14px 14px;
+    font-size:15px;
+    border:1px solid var(--sc-border);
+    border-radius:4px;
+    background:#fafafa;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+
+  .field input:focus{
+    border-color:var(--sc-black);
+    background:#fff;
+  }
+
+  .field input:focus-visible{
+    outline:2px solid #0eadff;
+    outline-offset:1px;
+  }
+
+  .login-btn{
+    margin-top:6px;
+    width:100%;
+    padding:14px;
+    background:var(--sc-yellow);
+    color:var(--sc-black);
+    font-weight:800;
+    font-size:15px;
+    border:none;
+    border-radius:24px;
+    cursor:pointer;
+    letter-spacing:.3px;
+    transition:transform .08s ease, box-shadow .15s ease;
+  }
+
+  .login-btn:hover{
+    box-shadow:0 2px 10px rgba(0,0,0,.15);
+  }
+
+  .login-btn:active{
+    transform:scale(0.98);
+  }
+
+  .login-btn:focus-visible{
+    outline:2px solid var(--sc-black);
+    outline-offset:2px;
+  }
+
+  .forgot-link{
+    margin-top:16px;
+    font-size:13px;
+    color:var(--sc-blue-link);
+    text-align:center;
+    text-decoration:none;
+    cursor:pointer;
+  }
+
+  .forgot-link:hover{ text-decoration:underline; }
+
+  .divider{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:28px 0 20px;
+    color:var(--sc-gray-text);
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+
+  .divider::before,
+  .divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--sc-border);
+  }
+
+  .signup-btn{
+    width:100%;
+    padding:13px;
+    background:#fff;
+    color:var(--sc-black);
+    font-weight:700;
+    font-size:14px;
+    border:1.5px solid var(--sc-black);
+    border-radius:24px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+
+  .signup-btn:hover{ background:#f4f4f4; }
+
+  .signup-btn:focus-visible{
+    outline:2px solid var(--sc-black);
+    outline-offset:2px;
+  }
+
+  footer{
+    margin-top:auto;
+    padding:24px 16px;
+    text-align:center;
+    font-size:11px;
+    color:var(--sc-gray-text);
+    line-height:1.8;
+  }
+
+  footer a{
+    color:var(--sc-gray-text);
+    text-decoration:none;
+    margin:0 6px;
+  }
+
+  footer a:hover{ text-decoration:underline; }
+
+  @media (max-width:480px){
+    .page-wrap{ padding:24px 16px; }
+    .logo-mark{ width:64px; height:64px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="top-bar"></div>
+
+  <div class="page-wrap">
+    <!-- Ghost-style logo, drawn independently (not a copy of any brand asset) -->
+    <svg class="logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="App logo">
+      <path d="M50 8
+               C 68 8, 76 22, 75 38
+               C 75 42, 75 46, 76 49
+               C 82 49, 87 52, 88 56
+               C 89 59, 87 61, 84 62
+               C 87 64, 89 67, 88 70
+               C 87 73, 83 74, 80 74
+               C 78 80, 72 84, 66 82
+               C 62 86, 56 88, 50 88
+               C 44 88, 38 86, 34 82
+               C 28 84, 22 80, 20 74
+               C 17 74, 13 73, 12 70
+               C 11 67, 13 64, 16 62
+               C 13 61, 11 59, 12 56
+               C 13 52, 18 49, 24 49
+               C 25 46, 25 42, 25 38
+               C 24 22, 32 8, 50 8 Z"
+            fill="var(--sc-yellow)" stroke="var(--sc-black)" stroke-width="2.5" stroke-linejoin="round"/>
+    </svg>
+    <div class="brand-word">Snapchat</div>
+
+    <div class="login-card">
+      <h1>Log in to Snapchat</h1>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="username" class="sr-only" style="position:absolute;left:-9999px;">Username</label>
+          <input type="text" id="username" name="username" placeholder="Username" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password" class="sr-only" style="position:absolute;left:-9999px;">Password</label>
+          <input type="password" id="password" name="password" placeholder="Password" autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="login-btn">Log In</button>
+      </form>
+
+      <p id="statusMsg" style="min-height:18px;font-size:13px;margin-top:12px;text-align:center;"></p>
+
+      <a href="#" class="forgot-link">Forgot your password?</a>
+
+      <div class="divider">or</div>
+
+      <button type="button" class="signup-btn" onclick="window.location.href='signup.html'">Sign Up</button>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const statusMsg = document.getElementById('statusMsg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusMsg.style.color = '#6c6c6c';
+      statusMsg.textContent = 'Logging in...';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          statusMsg.style.color = '#e0245e';
+          statusMsg.textContent = data.error || 'Login failed.';
+          return;
+        }
+
+        statusMsg.style.color = '#2f9e44';
+        statusMsg.textContent = data.message;
+        setTimeout(() => window.location.href = 'dashboard.html', 600);
+      } catch (err) {
+        statusMsg.style.color = '#e0245e';
+        statusMsg.textContent = 'Could not reach the server.';
+      }
+    });
+  </script>
+
+  <footer>
+    <div>&copy; 2026 Snapchat Demo &middot; This is an unofficial UI clone for learning purposes only.</div>
+    <div>
+      <a href="#">Privacy</a> &middot;
+      <a href="#">Terms</a> &middot;
+      <a href="#">Cookie Policy</a>
+    </div>
+  </footer>
+
+</body>
+</html>
